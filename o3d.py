@@ -17,9 +17,6 @@ from scipy.spatial.transform import Rotation
 def load_point_cloud(pcd_file_path):
     # 从PCD文件中读取点云数据
     point_cloud = o3d.io.read_point_cloud(pcd_file_path)
-
-    # 可视化点云
-   # o3d.visualization.draw_geometries([point_cloud])
     return point_cloud
 x=[]
 y=[]
@@ -34,13 +31,13 @@ file_path = "./022167/1625126565904426991.pcd"
 cloud = load_point_cloud(file_path)
 #print(len(cloud.points))
 #im = Image.open('./000150/stereo/000150.png')
-#im = Image.open('./010400/010400.png')
 im = Image.open('./022167/022167.png')
 #im = Image.open('./010300/stereo/010300.png')
+#im = Image.open('./010400/010400.png')
 pix = im.load()
-print('pix',im.size)
+#print('pix',im.size)
 points_3d = []
-print(len(cloud.points))
+#print(len(cloud.points))
 for i in range(len(cloud.points)):
     x_raw = cloud.points[i][0]
     y_raw = cloud.points[i][1]
@@ -55,7 +52,7 @@ for i in range(len(cloud.points)):
     points_3d.append(point_3d)
     distance_3d.append(y_raw)
 cube = np.float64(points_3d)
-print('cube的形状',cube.shape)
+#print('cube的形状',cube.shape)
 #print(cube)
 # 外参信息
 lidar_quaternion = [0.99826517514320456, -0.051288851007357569, 0.028412105004075816, -0.005370861000770469]
@@ -63,8 +60,6 @@ lidar_translation = [5.2480345660000003, -0.064328983000000006, -0.3886676450000
 
 stereo_quaternion = [0.50451874772890937, 0.49271166335600353, 0.50320304941532457, 0.4994824732081517]
 stereo_translation = [5.0362549728344614, -0.44101021275849878, -1.771000242852925]
-
-
 
 camera_matrix = np.float64([[1814.5061420730431, 0, 1026.1977130691339],
                             [0, 1814.5061420730431, 524.7984412358129],
@@ -88,9 +83,6 @@ lidar_to_ahrs_transform = np.eye(4)
 lidar_to_ahrs_transform[:3,:3] = lidar_rotation_matrix
 lidar_to_ahrs_transform[:3,3] = lidar_translation_vector
 
-# 激光雷达坐标系到世界坐标系的变换矩阵
-#lidar_to_world_transform = np.linalg.inv(lidar_to_ahrs_transform)
-
 # 构建相机的旋转矩阵和平移向量
 stereo_rotation = Rotation.from_quat(stereo_quaternion)
 stereo_rotation_matrix = stereo_rotation.as_matrix()
@@ -106,7 +98,7 @@ ahrs_to_stereo_transform = np.linalg.inv(stereo_to_ahrs_transform)
 lidar_to_stereo_transform =np.dot(ahrs_to_stereo_transform, lidar_to_ahrs_transform)
 
 lidar_to_stereo_rotation_matrix = lidar_to_stereo_transform[:3, :3]
-print(lidar_to_stereo_rotation_matrix)
+#print(lidar_to_stereo_rotation_matrix)
 lidar_to_stereo_rotation_verctor = cv2.Rodrigues(lidar_to_stereo_rotation_matrix)[0]
 #平移向量
 lidar_to_stereo_translation_vector = lidar_to_stereo_transform[:3, 3]
@@ -115,25 +107,18 @@ rvec = np.float64(lidar_to_stereo_rotation_verctor)
 tvec = np.float64(lidar_to_stereo_translation_vector)
 
 
-distCoeffs = np.float64([         -0.082292808267338341,
-         0.1036602731851739,
-         -0.0034940032414059268,
-         0.00084014002308057311,
-         0.093700291321559645])  #畸变参数，[k1,k2,p1,p2,k3]
-
 
 point_2d, _ = cv2.projectPoints(cube, rvec, tvec, camera_matrix, distCoeffs)
-print(point_2d.shape)
-print(rvec)
-print(tvec)
+# print(point_2d.shape)
+# print(rvec)
+# print(tvec)
 #print(point_2d[0].shape)
 point_2d_sque = np.squeeze(point_2d)
-#print(point_2d_sque)
-# np.savetxt('E:\\shu_ju\\selection\\2021-03-03-15-17-24\\pcd_1\\0_1614755848 - Cloud.txt', point_2d_sque)
+
 m=-1
 for point in point_2d:
     m=m+1
-    # 计算对称后的新坐标
+    #print(m)
     x_2d = point[0][0]
     y_2d = point[0][1]
 
